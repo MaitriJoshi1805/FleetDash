@@ -6,28 +6,38 @@ import {
   MdLogout,
 } from "react-icons/md";
 
-import { FaTruckMoving, FaRoute } from "react-icons/fa";
+import { FaTruckMoving, FaRoute, FaUserTie } from "react-icons/fa";
+import { NavLink } from "react-router-dom";
 
 const menuItems = [
   {
     name: "Dashboard",
+    path: "/",
     icon: <MdDashboard size={22} />,
-    active: true,
   },
   {
     name: "Vehicles",
+    path: "/vehicles",
     icon: <MdDirectionsCar size={22} />,
   },
   {
+    name: "Drivers",
+    path: "/drivers",
+    icon: <FaUserTie size={20} />,
+  },
+  {
     name: "Trips",
+    path: "/trips",
     icon: <FaRoute size={20} />,
   },
   {
     name: "Alerts",
+    path: "/alerts",
     icon: <MdNotifications size={22} />,
   },
   {
     name: "Settings",
+    path: "/settings",
     icon: <MdSettings size={22} />,
   },
 ];
@@ -56,23 +66,23 @@ function Sidebar() {
       {/* Menu */}
       <nav className="flex-1 px-5 py-8 space-y-3">
 
-        {menuItems.map((item) => (
-          <button
-            key={item.name}
-            className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300
-            ${
-              item.active
+      {menuItems.map((item) => (
+        <NavLink
+          key={item.name}
+          to={item.path}
+          end={item.path === "/"}
+          className={({ isActive }) =>
+            `w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 ${
+              isActive
                 ? "bg-blue-600 shadow-lg"
                 : "hover:bg-slate-800"
-            }`}
-          >
-            {item.icon}
-
-            <span className="font-medium">
-              {item.name}
-            </span>
-          </button>
-        ))}
+            }`
+          }
+        >
+          {item.icon}
+          <span>{item.name}</span>
+        </NavLink>
+      ))}
 
       </nav>
 
