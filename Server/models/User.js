@@ -1,30 +1,26 @@
 const mongoose = require("mongoose");
+const validator = require("validator");
 
 const userSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: true,
+      required: [true,"Name is Required"],
       trim: true,
     },
 
     email: {
       type: String,
-      required: true,
+      required: [true,"Email is Required"],
       unique: true,
       lowercase: true,
       trim: true,
+      validate: [validator.isEmail,"Invalid Email"],
     },
 
     password: {
       type: String,
-      required: true,
-    },
-
-    role: {
-      type: String,
-      enum: ["admin","manager","driver"],
-      default: "driver",
+      required: [true,"Password is required"],
     },
   },
   {
