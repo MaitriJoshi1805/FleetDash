@@ -1,11 +1,19 @@
-function App() {
-  return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-      <h1 className="text-5xl font-bold text-blue-500">
-        FleetDash 🚚
-      </h1>
-    </div>
-  );
-}
+const express = require("express");
+const cors = require("cors");
 
-export default App;
+const authRoutes = require("./routes/authRoutes");
+
+const app = express();
+
+//middleware for connecting client & server
+app.use(cors());
+app.use(express.json());
+
+//Route test
+app.get("/",(req,res) => {
+  res.send("API Running...");
+});
+
+app.use("/api/auth",authRoutes);
+
+module.exports = app;
