@@ -8,6 +8,7 @@ function Vehicles() {
 
     const [search, setSearch] = useState("");
     const [showModal, setShowModal] = useState(false);
+    const [editingVehicle, setEditingVehicle] = useState(null);
     const [vehicles, setVehicles] = useState(initialVehicles);
 
     const filteredVehicles = vehicles.filter((vehicle) =>
@@ -22,7 +23,28 @@ function Vehicles() {
             location: "Not Assigned",
             ...vehicle,
         };
-        setVehicles([...vehicles, newVehicle]);
+        setVehicles((prev) => [...prev, newVehicle]);
+    };
+
+    const updateVehicle = (updatedVehicle) => {
+      setVehicles((prev) =>
+        prev.map((vehicle) =>
+          vehicle.id === updatedVehicle.id
+            ? updatedVehicle
+            : vehicle
+        )
+      );
+      setEditingVehicle(null);
+    };
+
+    const deleteVehicle = (id) => {
+      const confirmDelete = window.confirm(
+        "Are you sure you want to delete this vehicle?"
+      );
+      if (!confirmDelete) return;
+      setVehicles((prev) =>
+        prev.filter((vehicle) => vehicle.id !== id)
+      );
     };
 
   return (
@@ -42,11 +64,13 @@ function Vehicles() {
         </div>
 
         <button
-            onClick={() => setShowModal(true)}
-            className="bg-blue-600 hover:bg-blue-700 px-5 py-3 rounded-xl flex items-center gap-2"
-            >
-            <FaPlus />
-            Add Vehicle
+          onClick={() => {
+            setEditingVehicle(null);
+            setShowModal(true);
+          }}
+          className="bg-blue-600 hover:bg-blue-700 px-5 py-3 rounded-xl flex items-center gap-2">
+          <FaPlus />
+          Add Vehicle
         </button>
 
       </div>
@@ -144,17 +168,20 @@ function Vehicles() {
                         </button>
 
                         <button
-                        className="bg-yellow-500 hover:bg-yellow-600 p-2 rounded-lg"
-                        title="Edit"
-                        >
-                        <FaEdit />
+                            onClick={() => {
+                              setEditingVehicle(vehicle);
+                              setShowModal(true);
+                            }}
+                            className="bg-yellow-500 hover:bg-yellow-600 p-2 rounded-lg"
+                            title="Edit">
+                            <FaEdit />
                         </button>
 
                         <button
-                        className="bg-red-600 hover:bg-red-700 p-2 rounded-lg"
-                        title="Delete"
-                        >
-                        <FaTrash />
+                          onClick={() => deleteVehicle(vehicle.id)}
+                          className="bg-red-600 hover:bg-red-700 p-2 rounded-lg"
+                          title="Delete">
+                          <FaTrash />
                         </button>
 
                     </div>
@@ -172,8 +199,12 @@ function Vehicles() {
 
       <AddVehicleModal
         isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        onSave={addVehicle}
+        onClose={() => {
+          setShowModal(false);
+          setEditingVehicle(null);
+        }}
+        onSave={editingVehicle ? updateVehicle : addVehicle}
+        editingVehicle={editingVehicle}
       />
 
     </div>
