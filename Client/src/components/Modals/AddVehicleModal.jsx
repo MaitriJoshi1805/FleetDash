@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-function AddVehicleModal({ isOpen, onClose, onSave }) {
+function AddVehicleModal({ isOpen, onClose, onSave, editingVehicle }) {
   const [formData, setFormData] = useState({
     vehicleNo: "",
     type: "",
@@ -9,6 +9,21 @@ function AddVehicleModal({ isOpen, onClose, onSave }) {
     fuel: "",
     status: "Online",
   });
+
+  useEffect(() => {
+    if (editingVehicle) {
+      setFormData(editingVehicle);
+    } else {
+      setFormData({
+        vehicleNo: "",
+        type: "",
+        driver: "",
+        phone: "",
+        fuel: "",
+        status: "Online",
+      });
+    }
+  }, [editingVehicle]);
 
   if (!isOpen) return null;
 
@@ -20,7 +35,14 @@ function AddVehicleModal({ isOpen, onClose, onSave }) {
   };
 
   const handleSave = () => {
-    onSave(formData);
+    if (editingVehicle) {
+      onSave({
+        ...editingVehicle,
+        ...formData,
+      });
+    } else {
+      onSave(formData);
+    }
 
     setFormData({
       vehicleNo: "",
@@ -39,7 +61,7 @@ function AddVehicleModal({ isOpen, onClose, onSave }) {
       <div className="bg-slate-900 w-full max-w-2xl rounded-2xl border border-slate-700 p-6">
 
         <h2 className="text-2xl font-bold text-white mb-6">
-          Add Vehicle
+          {editingVehicle ? "Edit Vehicle" : "Add Vehicle"}
         </h2>
 
         <div className="grid grid-cols-2 gap-4">
@@ -109,7 +131,7 @@ function AddVehicleModal({ isOpen, onClose, onSave }) {
             onClick={handleSave}
             className="px-5 py-2 bg-blue-600 rounded-lg"
           >
-            Save Vehicle
+            {editingVehicle ? "Update Vehicle" : "Save Vehicle"}
           </button>
 
         </div>
