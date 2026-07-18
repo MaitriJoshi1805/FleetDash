@@ -1,4 +1,56 @@
+import { useState } from "react";
+import { FaPlus, FaSearch, FaEye, FaEdit, FaTrash } from "react-icons/fa";
+import initialDrivers from "../data/drivers";
+import AddDriverModal from "../components/Modals/AddDriverModal";
+import ViewDriverModal from "../components/Modals/ViewDriverModal";
+
 function Drivers() {
+
+  const [search, setSearch] = useState("");
+  const [drivers, setDrivers] = useState(initialDrivers);
+  const [showModal, setShowModal] = useState(false);
+  const [editingDriver, setEditingDriver] = useState(null);
+  const [selectedDriver, setSelectedDriver] = useState(null);
+
+  const filteredDrivers = drivers.filter(
+    (driver) =>
+      driver.name.toLowerCase().includes(search.toLowerCase()) ||
+      driver.vehicle.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const addDriver = (driver) => {
+    const newDriver = {
+      id: Date.now(),
+      ...driver,
+    };
+
+    setDrivers((prev) => [...prev, newDriver]);
+  };
+
+  const updateDriver = (updatedDriver) => {
+    setDrivers((prev) =>
+      prev.map((driver) =>
+        driver.id === updatedDriver.id
+          ? updatedDriver
+          : driver
+      )
+    );
+
+    setEditingDriver(null);
+  };
+
+  const deleteDriver = (id) => {
+    const confirmDelete = window.confirm(
+      "Delete this driver?"
+    );
+
+    if (!confirmDelete) return;
+
+    setDrivers((prev) =>
+      prev.filter((driver) => driver.id !== id)
+    );
+  };
+
   return (
     <div className="space-y-6">
 
@@ -20,10 +72,30 @@ function Drivers() {
             Driver List
           </h2>
 
-          <button className="bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-lg">
+          <button
+            onClick={() => {
+              setEditingDriver(null);
+              setShowModal(true);
+            }}
+            className="bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-lg">
             + Add Driver
           </button>
+        </div>
 
+        <div className="mb-6">
+          <div className="relative w-96">
+
+            <FaSearch className="absolute top-4 left-4 text-slate-400" />
+
+            <input
+              type="text"
+              placeholder="Search Driver..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full bg-slate-800 rounded-xl pl-12 pr-4 py-3 outline-none text-white"
+            />
+
+          </div>
         </div>
 
         <table className="w-full">
@@ -40,49 +112,98 @@ function Drivers() {
 
               <th className="text-left">Status</th>
 
+              <th className="text-left">Actions</th>
+
             </tr>
 
           </thead>
 
           <tbody>
 
-            <tr className="border-b border-slate-800">
+            {filteredDrivers.map((driver) => (
 
-              <td className="py-4">SP</td>
+              <tr
+                key={driver.id}
+                className="border-b border-slate-800 hover:bg-slate-800">
 
-              <td>9876543210</td>
+                <td className="py-4">
+                  {driver.name}
+                </td>
 
-              <td>GJ05AB1234</td>
+                <td>
+                  {driver.phone}
+                </td>
 
-              <td>
-                <span className="bg-green-600 px-3 py-1 rounded-full text-sm">
-                  Driving
-                </span>
-              </td>
+                <td>
+                  {driver.vehicle}
+                </td>
 
-            </tr>
+                <td>
 
-            <tr>
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm ${
+                      driver.status === "Active"
+                        ? "bg-green-600"
+                        : "bg-yellow-600"
+                    }`}>
+                    {driver.status}
+                  </span>
 
-              <td className="py-4">Kamlesh</td>
+                </td>
 
-              <td>9123456789</td>
+                <td>
 
-              <td>GJ05XY5678</td>
+                  <div className="flex gap-3">
 
-              <td>
-                <span className="bg-yellow-600 px-3 py-1 rounded-full text-sm">
-                  Rest
-                </span>
-              </td>
+                    <button
+                      onClick={() => setSelectedDriver(driver)}
+                      className="bg-blue-600 p-2 rounded-lg hover:bg-blue-700">
+                      <FaEye />
+                    </button>
 
-            </tr>
+                    <button
+                      onClick={() => {
+                        setEditingDriver(driver);
+                        setShowModal(true);
+                      }}
+                      className="bg-yellow-500 hover:bg-yellow-600 p-2 rounded-lg">
+                      <FaEdit />
+                    </button>
+
+                    <button
+                      onClick={() => deleteDriver(driver.id)}
+                      className="bg-red-600 hover:bg-red-700 p-2 rounded-lg">
+                      <FaTrash />
+                    </button>
+
+                  </div>
+
+                </td>
+
+              </tr>
+
+            ))}
 
           </tbody>
 
         </table>
 
       </div>
+
+      <AddDriverModal
+        isOpen={showModal}
+        onClose={() => {
+          setShowModal(false);
+          setEditingDriver(null);
+        }}
+        onSave={editingDriver ? updateDriver : addDriver}
+        editingDriver={editingDriver}
+      />
+
+      <ViewDriverModal
+        driver={selectedDriver}
+        onClose={() => setSelectedDriver(null)}
+      />
 
     </div>
   );

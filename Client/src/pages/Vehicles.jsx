@@ -1,6 +1,7 @@
 import {FaPlus,FaSearch,FaEye,FaEdit,FaTrash,} from "react-icons/fa";
 import { useState } from "react";
 import AddVehicleModal from "../components/Modals/AddVehicleModal";
+import ViewVehicleModal from "../components/Modals/ViewVehicleModal";
 import initialVehicles from "../data/vehicles";
 
 
@@ -10,6 +11,7 @@ function Vehicles() {
     const [showModal, setShowModal] = useState(false);
     const [editingVehicle, setEditingVehicle] = useState(null);
     const [vehicles, setVehicles] = useState(initialVehicles);
+    const [selectedVehicle, setSelectedVehicle] = useState(null);
 
     const filteredVehicles = vehicles.filter((vehicle) =>
     vehicle.vehicleNo.toLowerCase().includes(search.toLowerCase()) ||
@@ -161,10 +163,10 @@ function Vehicles() {
                     <div className="flex gap-3">
 
                         <button
-                        className="bg-blue-600 hover:bg-blue-700 p-2 rounded-lg"
-                        title="View"
-                        >
-                        <FaEye />
+                          onClick={() => setSelectedVehicle(vehicle)}
+                          className="bg-blue-600 hover:bg-blue-700 p-2 rounded-lg"
+                          title="View">
+                          <FaEye />
                         </button>
 
                         <button
@@ -205,6 +207,11 @@ function Vehicles() {
         }}
         onSave={editingVehicle ? updateVehicle : addVehicle}
         editingVehicle={editingVehicle}
+      />
+
+      <ViewVehicleModal
+        vehicle={selectedVehicle}
+        onClose={() => setSelectedVehicle(null)}
       />
 
     </div>
