@@ -1,19 +1,18 @@
 const express = require("express");
 const cors = require("cors");
 
-const authRoutes = require("./routes/authRoutes");
+const vehicleRoutes = require("./routes/vehicleRoutes");
 
 const app = express();
 
-//middleware for connecting client & server
 app.use(cors());
 app.use(express.json());
 
-//Route test
-app.get("/",(req,res) => {
-  res.send("API Running...");
+app.get("/", (req, res) => {
+    res.send("FleetDash Backend Running");
 });
 
-app.use("/api/auth",authRoutes);
+// Vehicle API
+app.use("/api/vehicles", vehicleRoutes);
 
 module.exports = app;
