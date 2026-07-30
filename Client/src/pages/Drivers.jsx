@@ -1,5 +1,9 @@
 import { useState } from "react";
 import { FaPlus, FaSearch, FaEye, FaEdit, FaTrash } from "react-icons/fa";
+<<<<<<< HEAD
+=======
+
+>>>>>>> c61b146 (Updated vehicle, driver and trip pages)
 import initialDrivers from "../data/drivers";
 import AddDriverModal from "../components/Modals/AddDriverModal";
 import ViewDriverModal from "../components/Modals/ViewDriverModal";
@@ -18,6 +22,7 @@ function Drivers() {
       driver.vehicle.toLowerCase().includes(search.toLowerCase())
   );
 
+<<<<<<< HEAD
   const addDriver = (driver) => {
     const newDriver = {
       id: Date.now(),
@@ -30,16 +35,36 @@ function Drivers() {
   const updateDriver = (updatedDriver) => {
     setDrivers((prev) =>
       prev.map((driver) =>
+=======
+
+  const addDriver = (driver) => {
+    setDrivers([
+      ...drivers,
+      {
+        id: Date.now(),
+        ...driver,
+      },
+    ]);
+  };
+
+  const updateDriver = (updatedDriver) => {
+    setDrivers(
+      drivers.map((driver) =>
+>>>>>>> c61b146 (Updated vehicle, driver and trip pages)
         driver.id === updatedDriver.id
           ? updatedDriver
           : driver
       )
     );
+<<<<<<< HEAD
 
+=======
+>>>>>>> c61b146 (Updated vehicle, driver and trip pages)
     setEditingDriver(null);
   };
 
   const deleteDriver = (id) => {
+<<<<<<< HEAD
     const confirmDelete = window.confirm(
       "Delete this driver?"
     );
@@ -49,6 +74,10 @@ function Drivers() {
     setDrivers((prev) =>
       prev.filter((driver) => driver.id !== id)
     );
+=======
+    if (!window.confirm("Delete this driver?")) return;
+    setDrivers(drivers.filter((driver) => driver.id !== id));
+>>>>>>> c61b146 (Updated vehicle, driver and trip pages)
   };
 
   return (
@@ -98,10 +127,25 @@ function Drivers() {
           </div>
         </div>
 
+        <div className="mb-6">
+          <div className="relative w-96">
+
+            <FaSearch className="absolute top-4 left-4 text-slate-400" />
+
+            <input
+              type="text"
+              placeholder="Search Driver..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full bg-slate-800 rounded-xl pl-12 pr-4 py-3 outline-none text-white"
+            />
+
+          </div>
+        </div>
+
         <table className="w-full">
 
           <thead>
-
             <tr className="text-slate-400 border-b border-slate-700">
 
               <th className="text-left py-3">Driver</th>
@@ -113,9 +157,13 @@ function Drivers() {
               <th className="text-left">Status</th>
 
               <th className="text-left">Actions</th>
+<<<<<<< HEAD
 
             </tr>
+=======
+>>>>>>> c61b146 (Updated vehicle, driver and trip pages)
 
+            </tr>
           </thead>
 
           <tbody>
@@ -124,6 +172,7 @@ function Drivers() {
 
               <tr
                 key={driver.id}
+<<<<<<< HEAD
                 className="border-b border-slate-800 hover:bg-slate-800">
 
                 <td className="py-4">
@@ -176,6 +225,57 @@ function Drivers() {
                       <FaTrash />
                     </button>
 
+=======
+                className="border-b border-slate-800 hover:bg-slate-800"
+              >
+
+                <td className="py-4">{driver.name}</td>
+
+                <td>{driver.phone}</td>
+
+                <td>{driver.vehicle}</td>
+
+                <td>
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm ${
+                      driver.status === "Active"
+                        ? "bg-green-600"
+                        : "bg-yellow-600"
+                    }`}
+                  >
+                    {driver.status}
+                  </span>
+                </td>
+
+                <td>
+
+                  <div className="flex gap-3">
+
+                    <button
+                      onClick={() => setSelectedDriver(driver)}
+                      className="bg-blue-600 p-2 rounded-lg"
+                    >
+                      <FaEye />
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setEditingDriver(driver);
+                        setShowModal(true);
+                      }}
+                      className="bg-yellow-500 p-2 rounded-lg"
+                    >
+                      <FaEdit />
+                    </button>
+
+                    <button
+                      onClick={() => deleteDriver(driver.id)}
+                      className="bg-red-600 p-2 rounded-lg"
+                    >
+                      <FaTrash />
+                    </button>
+
+>>>>>>> c61b146 (Updated vehicle, driver and trip pages)
                   </div>
 
                 </td>
