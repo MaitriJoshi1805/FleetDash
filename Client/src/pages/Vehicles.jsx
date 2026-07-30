@@ -163,15 +163,12 @@ function Vehicles() {
                     <div className="flex gap-3">
 
                         <button
-                          onClick={() => setSelectedVehicle(vehicle)}
-<<<<<<< HEAD
-                          className="bg-blue-600 hover:bg-blue-700 p-2 rounded-lg"
-                          title="View">
-=======
-                          className="bg-blue-600 hover:bg-blue-700 p-2 rounded-lg">
->>>>>>> c61b146 (Updated vehicle, driver and trip pages)
-                          <FaEye />
-                        </button>
+                        onClick={() => setSelectedVehicle(vehicle)}
+                        className="bg-blue-600 hover:bg-blue-700 p-2 rounded-lg"
+                        title="View"
+                      >
+                        <FaEye />
+                      </button>
 
                         <button
                             onClick={() => {
