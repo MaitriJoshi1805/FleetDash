@@ -1,51 +1,79 @@
+import { useState, useEffect } from "react";
 import {
-  LineChart,
-  Line,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
-  Tooltip,
-  ResponsiveContainer,
   CartesianGrid,
+  Tooltip,
 } from "recharts";
+import { useTheme } from "../../context/ThemeContext";
 
-const data = [
-  { day: "Mon", vehicles: 90 },
-  { day: "Tue", vehicles: 105 },
-  { day: "Wed", vehicles: 98 },
-  { day: "Thu", vehicles: 120 },
-  { day: "Fri", vehicles: 115 },
-  { day: "Sat", vehicles: 125 },
-  { day: "Sun", vehicles: 130 },
-];
 
 function FleetChart() {
-  return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-lg p-5 h-[450px]">
+  const { theme } = useTheme();
 
-      <h2 className="text-xl font-bold text-white mb-6">
-        Fleet Activity
+  const [data, setData] = useState([
+  { day: "Mon", trips: 32 },
+  { day: "Tue", trips: 45 },
+  { day: "Wed", trips: 38 },
+  { day: "Thu", trips: 52 },
+  { day: "Fri", trips: 48 },
+  { day: "Sat", trips: 61 },
+  { day: "Sun", trips: 29 },
+]);
+
+
+  return (
+    <div
+      className={`rounded-2xl p-6 border ${
+        theme === "dark"
+          ? "bg-slate-900 border-slate-800"
+          : "bg-white border-gray-300"
+      }`}
+    >
+      <h2
+        className={`text-2xl font-bold mb-6 ${
+          theme === "dark" ? "text-white" : "text-gray-900"
+        }`}
+      >
+        Weekly Trips
       </h2>
 
-      <ResponsiveContainer width="100%" height="90%">
-        <LineChart data={data}>
-          <CartesianGrid stroke="#334155" />
-
-          <XAxis dataKey="day" stroke="#94a3b8" />
-
-          <YAxis stroke="#94a3b8" />
-
-          <Tooltip />
-
-          <Line
-            type="monotone"
-            dataKey="vehicles"
-            stroke="#3b82f6"
-            strokeWidth={4}
+      <ResponsiveContainer width="100%" height={320}>
+        <BarChart data={data}>
+          <CartesianGrid
+            strokeDasharray="5 5"
+            stroke={theme === "dark" ? "#334155" : "#d1d5db"}
           />
 
-        </LineChart>
-      </ResponsiveContainer>
+          <XAxis
+            dataKey="day"
+            stroke={theme === "dark" ? "#94a3b8" : "#475569"}
+          />
 
+          <YAxis
+            stroke={theme === "dark" ? "#94a3b8" : "#475569"}
+            domain={[0, 100]}
+          />
+
+          <Tooltip
+          contentStyle={{
+            backgroundColor: theme === "dark" ? "#1e293b" : "#ffffff",
+            borderRadius: "10px",
+            border: "none",
+          }}/>
+
+          <Bar
+            dataKey="trips"
+            fill="#3b82f6"
+            radius={[10, 10, 0, 0]}
+            animationDuration={1500}
+            animationEasing="ease-in-out"
+          />
+        </BarChart>
+      </ResponsiveContainer>
     </div>
   );
 }
