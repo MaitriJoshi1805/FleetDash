@@ -1,5 +1,7 @@
 import DashboardCards from "../components/DashboardCards/DashboardCards";
-import MapPlaceholder from "../components/Map/MapPlaceholder";
+// import MapPlaceholder from "../components/Map/MapPlaceholder";
+import LiveActivity from "../components/LiveActivity";
+import MapView from "../components/MapView";
 import FleetChart from "../components/Charts/FleetChart";
 import VehicleTable from "../components/VehicleTable/VehicleTable";
 
@@ -11,11 +13,12 @@ function Dashboard() {
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div className="xl:col-span-2">
-          <MapPlaceholder />
+          <MapView />
         </div>
-
-        <FleetChart />
+        <LiveActivity />
       </div>
+      
+       <FleetChart />
 
       <VehicleTable />
 
