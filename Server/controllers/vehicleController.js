@@ -1,35 +1,137 @@
-const redisClient = require("../config/redis");
+const Vehicle = require("../models/Vehicle");
+const Driver = require("../models/Driver");
 
-const getAllVehicles = async (req, res) => {
+// Add Vehicle
+const addVehicle = async (req,res) => {
+    try{
+        const { driverId } = req.body;
+        const driver = await Driver.findById(driverId);
+        if(!driver) {
+            return res.status(404).json({
+                success: false,
+                message: "Driver not found"
+            });
+        }
+        const vehicle = await Vehicle.create(req.body);
+
+        res.status(201).json({
+            success: true,
+            message: "Vehicle Added Successfully",
+            data: vehicle
+        });
+    } catch(err){
+        res.status(500).json({
+            success: false,
+            message: err.message
+        });
+    }
+};
+
+// Get All Vehicles
+const getAllVehicles = async(req,res) => {
     try {
+        const vehicles = await Vehicle.find.populate("driverId","name");
 
-        const keys = await redisClient.keys("vehicle:*");
+        res.status(200).json({
+           success: true,
+           count: vehicle.length,
+           data: vehicles 
+        });
+    } catch(err) {
+        res.status(500).json({
+            success: false,
+            message: err.message
+        });
+    }
+};
 
-        const vehicles = [];
+// Get Vehicle By Id
+const getVehicleById = async(req,res) => {
+    try {
+        const vehicle = await Vehicle.findById(req.params.id).populate("driverId","name");
 
-        for (const key of keys) {
-            const data = await redisClient.get(key);
-            vehicles.push(JSON.parse(data));
+        if(!vehicle) {
+            return res.status(404).json({
+                success: false,
+                message: "Vehicle not found"
+            });
         }
 
         res.status(200).json({
             success: true,
-            count: vehicles.length,
-            vehicles
+            data: vehicle
         });
 
-    } catch (error) {
-
-        console.error(error);
-
+    } catch(err) {
         res.status(500).json({
             success: false,
-            message: "Unable to fetch vehicles"
+            message: err.message
+        });
+    }
+};
+
+// Update Vehicle
+const updateVehicle = async (req,res) => {
+    try{
+        const vehicle = await Vehicle.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            {
+                new:true,
+                runValidators: true
+            }
+        );
+
+        if(!vehicle) {
+            return res.status(404).json({
+                success: false,
+                message: "Vehicle not found"
+            }); 
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Vehicle Updated Successfully",
+            data: vehicle
         });
 
+    } catch(err) { 
+        res.status(500).json({
+            success: false,
+            message: err.message
+        });
+    }
+};
+
+const deleteVehicle = async (req,res) => {
+    try{
+        const vehicle = await Vehicle.findByIdAndDelete(req.params.id);
+
+        if(!vehicle) {
+           return res.status(404).json({
+                success: false,
+                message: "Vehicle not found"
+            }); 
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Vehicle Deleted Successfully",
+            data: vehicle
+        });
+
+    } catch(err) {
+        res.status(500).json({
+            success: false,
+            message: err.message
+        });
     }
 };
 
 module.exports = {
-    getAllVehicles
+    addVehicle,
+    getAllVehicles,
+    getVehicleById,
+    updateVehicle,
+    deleteVehicle
 };
