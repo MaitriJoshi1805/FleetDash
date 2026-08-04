@@ -4,6 +4,7 @@ const cors = require("cors");
 const driverRoutes = require("./routes/driverRoutes");
 const vehicleRoutes = require("./routes/vehicleRoutes");
 const geofenceRoutes = require("./routes/geofenceRoutes");
+const telemetryRoutes = require("./routes/telemetryRoutes");
 
 const app = express();
 
@@ -28,6 +29,9 @@ app.use("/api/vehicles", vehicleRoutes);
 
 // Geofence Routes
 app.use("/api/geofence",geofenceRoutes);
+
+// Telemetry Routes
+app.use("/api/telemetry",telemetryRoutes);
 
 //********************************************************************************************************************
 //********************************************************************************************************************
