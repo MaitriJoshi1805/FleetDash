@@ -3,59 +3,44 @@ function ViewDriverModal({ driver, onClose }) {
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-<<<<<<< HEAD
-      <div className="bg-slate-900 w-full max-w-lg rounded-2xl border border-slate-700 p-6">
-=======
-
       <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-lg p-6">
->>>>>>> c61b146 (Updated vehicle, driver and trip pages)
-
-        <h2 className="text-2xl font-bold mb-6">
+        <h2 className="text-2xl font-bold text-white mb-6">
           Driver Details
         </h2>
 
-<<<<<<< HEAD
-        <div className="space-y-3 text-slate-300">
+        <div className="space-y-4 text-slate-300">
+          <p>
+            <strong>Name:</strong> {driver.name}
+          </p>
 
-          <p><strong>Name:</strong> {driver.name}</p>
-          <p><strong>Phone:</strong> {driver.phone}</p>
-          <p><strong>License:</strong> {driver.license}</p>
-          <p><strong>Experience:</strong> {driver.experience}</p>
-          <p><strong>Assigned Vehicle:</strong> {driver.vehicle}</p>
-=======
-        <div className="space-y-4">
+          <p>
+            <strong>Phone:</strong> {driver.phone}
+          </p>
 
-          <p><strong>Name:</strong> {driver.name}</p>
+          <p>
+            <strong>License:</strong> {driver.license}
+          </p>
 
-          <p><strong>Phone:</strong> {driver.phone}</p>
+          <p>
+            <strong>Experience:</strong> {driver.experience}
+          </p>
 
-          <p><strong>License:</strong> {driver.license}</p>
+          <p>
+            <strong>Assigned Vehicle:</strong> {driver.vehicle}
+          </p>
 
-          <p><strong>Experience:</strong> {driver.experience}</p>
-
-          <p><strong>Vehicle:</strong> {driver.vehicle}</p>
-
->>>>>>> c61b146 (Updated vehicle, driver and trip pages)
-          <p><strong>Status:</strong> {driver.status}</p>
-
+          <p>
+            <strong>Status:</strong> {driver.status}
+          </p>
         </div>
 
         <button
           onClick={onClose}
-<<<<<<< HEAD
-          className="mt-6 w-full bg-blue-600 hover:bg-blue-700 py-3 rounded-xl"
-=======
-          className="mt-8 w-full bg-blue-600 hover:bg-blue-700 py-3 rounded-xl"
->>>>>>> c61b146 (Updated vehicle, driver and trip pages)
+          className="mt-8 w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl transition"
         >
           Close
         </button>
-
       </div>
-<<<<<<< HEAD
-=======
-
->>>>>>> c61b146 (Updated vehicle, driver and trip pages)
     </div>
   );
 }
