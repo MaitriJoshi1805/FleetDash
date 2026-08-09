@@ -4,11 +4,14 @@ const http = require("http");
 const app = require("./app");
 const initializeSocket = require("./sockets");
 const connectDB = require("./config/db");
+const seedDatabase = require("./utils/seeder");
 
 const PORT = process.env.PORT || 5000;
 
-// Connect to MongoDB
-connectDB();
+// Connect to MongoDB & Seed Database
+connectDB().then(async () => {
+    await seedDatabase();
+});
 
 // Create HTTP server
 const server = http.createServer(app);
