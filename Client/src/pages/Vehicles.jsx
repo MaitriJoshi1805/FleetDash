@@ -150,7 +150,7 @@ function Vehicles() {
                         vehicle.status === "Online"
                         ? "bg-green-600"
                         : "bg-red-600"
-                    }`}
+                    }}
                     >
                     {vehicle.status}
                     </span>
@@ -166,6 +166,11 @@ function Vehicles() {
                           onClick={() => setSelectedVehicle(vehicle)}
                           className="bg-blue-600 hover:bg-blue-700 p-2 rounded-lg"
                           title="View">
+
+
+                          className="bg-blue-600 hover:bg-blue-700 p-2 rounded-lg"
+                          title="View">
+                            
                           <FaEye />
                         </button>
 
