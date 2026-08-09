@@ -48,3 +48,29 @@ const geofenceSchema = new mongoose.Schema(
 geofenceSchema.index({ name: 1 });
 
 module.exports = mongoose.model("Geofence", geofenceSchema);
+      required: true
+    },
+    type: {
+      type: String,
+      enum: ["Circle","Polygon"],
+      required: true
+    },
+    center: {
+      latitude: Number,
+      longitude: Number
+    },
+    radius: {
+      type: Number,
+      default: 0
+    },
+    polygon: [{
+      latitude: Number,
+      longitude: Number
+    }]
+  },
+  {
+    timestamps: true
+  }
+);
+
+mongoose.exports = mongoose.model("Geofence",geofenceSchema);

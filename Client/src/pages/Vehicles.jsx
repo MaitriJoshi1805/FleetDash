@@ -188,6 +188,11 @@ function Vehicles() {
                           ? "bg-emerald-600/30 text-emerald-400 border border-emerald-500/30"
                           : "bg-red-600/30 text-red-400 border border-red-500/30"
                       }`}
+                    className={`px-3 py-1 rounded-full text-sm ${
+                        vehicle.status === "Online"
+                        ? "bg-green-600"
+                        : "bg-red-600"
+                    }}
                     >
                       {vehicle.status}
                     </span>
@@ -221,6 +226,36 @@ function Vehicles() {
                       >
                         <FaTrash />
                       </button>
+
+                        <button
+                          onClick={() => setSelectedVehicle(vehicle)}
+                          className="bg-blue-600 hover:bg-blue-700 p-2 rounded-lg"
+                          title="View">
+
+
+                          className="bg-blue-600 hover:bg-blue-700 p-2 rounded-lg"
+                          title="View">
+                            
+                          <FaEye />
+                        </button>
+
+                        <button
+                            onClick={() => {
+                              setEditingVehicle(vehicle);
+                              setShowModal(true);
+                            }}
+                            className="bg-yellow-500 hover:bg-yellow-600 p-2 rounded-lg"
+                            title="Edit">
+                            <FaEdit />
+                        </button>
+
+                        <button
+                          onClick={() => deleteVehicle(vehicle.id)}
+                          className="bg-red-600 hover:bg-red-700 p-2 rounded-lg"
+                          title="Delete">
+                          <FaTrash />
+                        </button>
+
                     </div>
                   </td>
                 </tr>

@@ -28,6 +28,20 @@ function ViewDriverModal({ driver, onClose }) {
           <p>
             <strong>Assigned Vehicle:</strong> {driver.vehicle}
           </p>
+      <div className="bg-slate-900 w-full max-w-lg rounded-2xl border border-slate-700 p-6">
+
+        <h2 className="text-2xl font-bold mb-6">
+          Driver Details
+        </h2>
+
+        <div className="space-y-3 text-slate-300">
+
+          <p><strong>Name:</strong> {driver.name}</p>
+          <p><strong>Phone:</strong> {driver.phone}</p>
+          <p><strong>License:</strong> {driver.license}</p>
+          <p><strong>Experience:</strong> {driver.experience}</p>
+          <p><strong>Assigned Vehicle:</strong> {driver.vehicle}</p>
+          <p><strong>Status:</strong> {driver.status}</p>
 
           <p>
             <strong>Status:</strong> {driver.status}
@@ -37,6 +51,8 @@ function ViewDriverModal({ driver, onClose }) {
         <button
           onClick={onClose}
           className="mt-8 w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl transition"
+
+          className="mt-6 w-full bg-blue-600 hover:bg-blue-700 py-3 rounded-xl"
         >
           Close
         </button>

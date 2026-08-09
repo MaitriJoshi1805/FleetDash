@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react";
 import { FaSearch, FaEye, FaEdit, FaTrash, FaPlus } from "react-icons/fa";
+import { useState } from "react";
+import { FaSearch, FaEye, FaEdit, FaTrash } from "react-icons/fa";
+import { FaPlus, FaSearch, FaEye, FaEdit, FaTrash } from "react-icons/fa";
+import initialDrivers from "../data/drivers";
 import AddDriverModal from "../components/Modals/AddDriverModal";
 import ViewDriverModal from "../components/Modals/ViewDriverModal";
 import { getDrivers, createDriverApi, updateDriverApi, deleteDriverApi } from "../services/api";
@@ -63,6 +67,32 @@ function Drivers() {
     } catch (err) {
       alert(err.response?.data?.message || "Failed to update driver.");
     }
+
+  const addDriver = (driver) => {
+    const newDriver = {
+      id: Date.now(),
+      ...driver,
+    };
+
+    setDrivers((prev) => [...prev, newDriver]);
+  };
+
+  const updateDriver = (updatedDriver) => {
+    setDrivers((prev) =>
+      prev.map((driver) =>
+        driver.id === updatedDriver.id ? updatedDriver : driver
+      )
+    );
+
+        driver.id === updatedDriver.id
+          ? updatedDriver
+          : driver
+      )
+    );
+
+
+
+    setEditingDriver(null);
   };
 
   const deleteDriver = async (id) => {
@@ -75,6 +105,16 @@ function Drivers() {
     } catch (err) {
       alert("Failed to delete driver.");
     }
+    setDrivers((prev) => prev.filter((driver) => driver.id !== id));
+    const confirmDelete = window.confirm(
+      "Delete this driver?"
+    );
+
+    if (!confirmDelete) return;
+
+    setDrivers((prev) =>
+      prev.filter((driver) => driver.id !== id)
+    );
   };
 
   return (
@@ -108,11 +148,12 @@ function Drivers() {
               onChange={(e) => setSearch(e.target.value)}
               className="w-full bg-slate-800 rounded-xl pl-12 pr-4 py-3 outline-none text-white"
             />
-          </div>
+         </div>
         </div>
 
         <table className="w-full">
           <thead>
+
             <tr className="text-slate-400 border-b border-slate-700">
               <th className="text-left py-3">Driver Name</th>
               <th className="text-left">Phone</th>
@@ -121,6 +162,9 @@ function Drivers() {
               <th className="text-left">Status</th>
               <th className="text-left">Actions</th>
             </tr>
+
+            </tr>
+
           </thead>
 
           <tbody>
@@ -134,6 +178,90 @@ function Drivers() {
               <tr>
                 <td colSpan="6" className="py-6 text-center text-slate-400">
                   No drivers found.
+            {filteredDrivers.map((driver) => (
+              <tr
+                key={driver.id}
+                className="border-b border-slate-800 hover:bg-slate-800"
+              >
+                <td className="py-4">{driver.name}</td>
+
+                <td>{driver.phone}</td>
+
+                <td>{driver.vehicle}</td>
+
+                <td>
+
+                className="border-b border-slate-800 hover:bg-slate-800">
+
+                <td className="py-4">
+                  {driver.name}
+                </td>
+
+                <td>
+                  {driver.phone}
+                </td>
+
+                <td>
+                  {driver.vehicle}
+                </td>
+
+                <td>
+
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm ${
+                      driver.status === "Active"
+                        ? "bg-green-600"
+                        : "bg-yellow-600"
+                    }}
+                  >
+                    {driver.status}
+                  </span>
+                </td>
+
+                <td>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setSelectedDriver(driver)}
+                      className="bg-blue-600 hover:bg-blue-700 p-2 rounded-lg"
+                    >
+                    }}>
+                    {driver.status}
+                  </span>
+
+                </td>
+
+                <td>
+
+                  <div className="flex gap-3">
+
+                    <button
+                      onClick={() => setSelectedDriver(driver)}
+                      className="bg-blue-600 p-2 rounded-lg hover:bg-blue-700">
+                      <FaEye />
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setEditingDriver(driver);
+                        setShowModal(true);
+                      }}
+                      className="bg-yellow-500 hover:bg-yellow-600 p-2 rounded-lg"
+                    >
+                      className="bg-yellow-500 hover:bg-yellow-600 p-2 rounded-lg">
+                      <FaEdit />
+                    </button>
+
+                    <button
+                      onClick={() => deleteDriver(driver.id)}
+                      className="bg-red-600 hover:bg-red-700 p-2 rounded-lg"
+                    >
+                      <FaTrash />
+                    </button>
+                      className="bg-red-600 hover:bg-red-700 p-2 rounded-lg">
+                      <FaTrash />
+                    </button>
+
+                  </div>
                 </td>
               </tr>
             ) : (

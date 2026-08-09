@@ -60,6 +60,10 @@ function AddDriverModal({
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
       <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-2xl p-6">
         <h2 className="text-2xl font-bold text-white mb-6">
+
+      <div className="bg-slate-900 w-full max-w-2xl rounded-2xl border border-slate-700 p-6">
+
+        <h2 className="text-2xl font-bold mb-6">
           {editingDriver ? "Edit Driver" : "Add Driver"}
         </h2>
 
