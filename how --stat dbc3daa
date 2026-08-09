@@ -1,0 +1,15 @@
+[33mcommit dbc3daae3c05c27648b883373aeff26c0ad9eede[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mkamlesh/frontend[m[33m, [m[1;31morigin/kamlesh/frontend[m[33m)[m
+Author: Kamlesh <kd276321@gmail.com>
+Date:   Thu Aug 6 15:43:21 2026 +0530
+
+    Demo
+
+ Client/node_modules/.package-lock.json            |  66 [32m+++++++++[m
+ Client/package-lock.json                          |  42 [31m------[m
+ Client/src/components/Modals/AddDriverModal.jsx   |  69 [32m++++[m[31m-----[m
+ Client/src/components/Modals/ViewDriverModal.jsx  |  57 [32m+++[m[31m-----[m
+ Client/src/components/Modals/ViewVehicleModal.jsx |  59 [32m++++[m[31m----[m
+ Client/src/data/drivers.js                        |   9 [31m--[m
+ Client/src/pages/Drivers.jsx                      | 168 [32m++[m[31m--------------------[m
+ Client/src/pages/Vehicles.jsx                     |   4 [31m-[m
+ 8 files changed, 157 insertions(+), 317 deletions(-)

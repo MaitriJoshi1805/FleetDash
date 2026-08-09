@@ -2,6 +2,7 @@ const initialDrivers = [
   {
     id: 1,
     name: "SP",
+    name: "Shailesh Praapati",
     phone: "9876543210",
     license: "GJ052023001",
     experience: "5 Years",
@@ -11,6 +12,7 @@ const initialDrivers = [
   {
     id: 2,
     name: "Kamlesh",
+    name: "KAmlesh Darji",
     phone: "9988776655",
     license: "GJ052023002",
     experience: "8 Years",
@@ -20,6 +22,7 @@ const initialDrivers = [
   {
     id: 3,
     name: "Dev",
+    name: "Dev Mali",
     phone: "9090909090",
     license: "GJ052023003",
     experience: "2 Years",
