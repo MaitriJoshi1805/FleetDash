@@ -1,34 +1,61 @@
 const Vehicle = require("../models/Vehicle");
+const Driver = require("../models/Driver");
 const redisClient = require("../config/redis");
 
-// Get all vehicles from MongoDB (merged with latest Redis telemetry)
+// ======================================================
+// GET ALL VEHICLES
+// MongoDB data + latest Redis telemetry
+// ======================================================
+
 const getAllVehicles = async (req, res) => {
   try {
-    let vehicles = await Vehicle.find().sort({ createdAt: -1 }).lean();
+    let vehicles = await Vehicle.find()
+      .sort({ createdAt: -1 })
+      .lean();
 
-    // Try merging latest telemetry from Redis if available
+    // Try to merge latest telemetry from Redis
     try {
       if (redisClient.isOpen) {
         for (let i = 0; i < vehicles.length; i++) {
           const key = `vehicle:${vehicles[i].vehicleNo}`;
+
           const cachedDataStr = await redisClient.get(key);
+
           if (cachedDataStr) {
             const cached = JSON.parse(cachedDataStr);
+
             vehicles[i] = {
               ...vehicles[i],
-              latitude: cached.latitude ?? vehicles[i].latitude,
-              longitude: cached.longitude ?? vehicles[i].longitude,
-              speed: cached.speed ?? vehicles[i].speed,
-              fuel: cached.fuel ?? vehicles[i].fuel,
-              status: cached.status ?? vehicles[i].status,
-              engine: cached.engine ?? vehicles[i].engine,
-              temperature: cached.temperature ?? vehicles[i].temperature,
+
+              latitude:
+                cached.latitude ?? vehicles[i].latitude,
+
+              longitude:
+                cached.longitude ?? vehicles[i].longitude,
+
+              speed:
+                cached.speed ?? vehicles[i].speed,
+
+              fuel:
+                cached.fuel ?? vehicles[i].fuel,
+
+              status:
+                cached.status ?? vehicles[i].status,
+
+              engine:
+                cached.engine ?? vehicles[i].engine,
+
+              temperature:
+                cached.temperature ?? vehicles[i].temperature,
             };
           }
         }
       }
     } catch (redisErr) {
-      console.warn("Redis read warning:", redisErr.message);
+      console.warn(
+        "Redis read warning:",
+        redisErr.message
+      );
     }
 
     res.status(200).json({
@@ -36,8 +63,13 @@ const getAllVehicles = async (req, res) => {
       count: vehicles.length,
       vehicles,
     });
+
   } catch (error) {
-    console.error("getAllVehicles error:", error);
+    console.error(
+      "getAllVehicles error:",
+      error
+    );
+
     res.status(500).json({
       success: false,
       message: "Unable to fetch vehicles",
@@ -46,42 +78,113 @@ const getAllVehicles = async (req, res) => {
   }
 };
 
-// Get single vehicle
+
+// ======================================================
+// GET SINGLE VEHICLE
+// ======================================================
+
 const getVehicleById = async (req, res) => {
   try {
-    const vehicle = await Vehicle.findById(req.params.id);
+    const vehicle = await Vehicle.findById(
+      req.params.id
+    );
+
     if (!vehicle) {
-      return res.status(404).json({ success: false, message: "Vehicle not found" });
+      return res.status(404).json({
+        success: false,
+        message: "Vehicle not found",
+      });
     }
-    res.status(200).json({ success: true, vehicle });
+
+    res.status(200).json({
+      success: true,
+      vehicle,
+    });
+
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error(
+      "getVehicleById error:",
+      error
+    );
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
-// Create new vehicle
+
+// ======================================================
+// CREATE VEHICLE
+// ======================================================
+
 const createVehicle = async (req, res) => {
   try {
-    const { vehicleNo, driver, phone, type, fuel, status, location, latitude, longitude } = req.body;
+    const {
+      vehicleNo,
+      driver,
+      phone,
+      type,
+      fuel,
+      status,
+      location,
+      latitude,
+      longitude,
+    } = req.body;
+
+    // Validate vehicle number
     if (!vehicleNo) {
-      return res.status(400).json({ success: false, message: "Vehicle Number is required" });
+      return res.status(400).json({
+        success: false,
+        message: "Vehicle Number is required",
+      });
     }
 
-    const existing = await Vehicle.findOne({ vehicleNo });
+    // Check duplicate vehicle
+    const existing = await Vehicle.findOne({
+      vehicleNo,
+    });
+
     if (existing) {
-      return res.status(400).json({ success: false, message: "Vehicle already exists" });
+      return res.status(400).json({
+        success: false,
+        message: "Vehicle already exists",
+      });
     }
 
     const newVehicle = await Vehicle.create({
       vehicleNo,
-      driver: driver || "Unassigned",
-      phone: phone || "",
-      type: type || "Truck",
-      fuel: fuel ? Number(fuel) : 100,
-      status: status || "Online",
-      location: location || "HQ Depot",
-      latitude: latitude ? Number(latitude) : 19.076,
-      longitude: longitude ? Number(longitude) : 72.8777,
+
+      driver:
+        driver || "Unassigned",
+
+      phone:
+        phone || "",
+
+      type:
+        type || "Truck",
+
+      fuel:
+        fuel !== undefined
+          ? Number(fuel)
+          : 100,
+
+      status:
+        status || "Online",
+
+      location:
+        location || "HQ Depot",
+
+      latitude:
+        latitude !== undefined
+          ? Number(latitude)
+          : 19.076,
+
+      longitude:
+        longitude !== undefined
+          ? Number(longitude)
+          : 72.8777,
     });
 
     res.status(201).json({
@@ -89,171 +192,133 @@ const createVehicle = async (req, res) => {
       message: "Vehicle created successfully",
       vehicle: newVehicle,
     });
+
   } catch (error) {
-    console.error("createVehicle error:", error);
-    res.status(500).json({ success: false, message: error.message });
+    console.error(
+      "createVehicle error:",
+      error
+    );
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
-// Update vehicle
-const updateVehicle = async (req, res) => {
+
+// ======================================================
+// ADD VEHICLE WITH DRIVER
+// ======================================================
+
+const addVehicle = async (req, res) => {
   try {
-    const vehicle = await Vehicle.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
+    const { driverId } = req.body;
+
+    // If driverId is provided, verify driver
+    if (driverId) {
+      const driver = await Driver.findById(
+        driverId
+      );
+
+      if (!driver) {
+        return res.status(404).json({
+          success: false,
+          message: "Driver not found",
+        });
+      }
+    }
+
+    const vehicle = await Vehicle.create(
+      req.body
+    );
+
+    res.status(201).json({
+      success: true,
+      message: "Vehicle Added Successfully",
+      data: vehicle,
     });
 
+  } catch (error) {
+    console.error(
+      "addVehicle error:",
+      error
+    );
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
+// ======================================================
+// UPDATE VEHICLE
+// ======================================================
+
+const updateVehicle = async (req, res) => {
+  try {
+    const vehicle =
+      await Vehicle.findByIdAndUpdate(
+        req.params.id,
+        req.body,
+        {
+          new: true,
+          runValidators: true,
+        }
+      );
+
     if (!vehicle) {
-      return res.status(404).json({ success: false, message: "Vehicle not found" });
-const Driver = require("../models/Driver");
-
-// Add Vehicle
-const addVehicle = async (req,res) => {
-    try{
-        const { driverId } = req.body;
-        const driver = await Driver.findById(driverId);
-        if(!driver) {
-            return res.status(404).json({
-                success: false,
-                message: "Driver not found"
-            });
-        }
-        const vehicle = await Vehicle.create(req.body);
-
-        res.status(201).json({
-            success: true,
-            message: "Vehicle Added Successfully",
-            data: vehicle
-        });
-    } catch(err){
-        res.status(500).json({
-            success: false,
-            message: err.message
-        });
-    }
-};
-
-// Get All Vehicles
-const getAllVehicles = async(req,res) => {
-    try {
-        const vehicles = await Vehicle.find.populate("driverId","name");
-
-        res.status(200).json({
-           success: true,
-           count: vehicle.length,
-           data: vehicles 
-        });
-    } catch(err) {
-        res.status(500).json({
-            success: false,
-            message: err.message
-        });
-    }
-};
-
-// Get Vehicle By Id
-const getVehicleById = async(req,res) => {
-    try {
-        const vehicle = await Vehicle.findById(req.params.id).populate("driverId","name");
-
-        if(!vehicle) {
-            return res.status(404).json({
-                success: false,
-                message: "Vehicle not found"
-            });
-        }
-
-        res.status(200).json({
-            success: true,
-            data: vehicle
-        });
-
-    } catch(err) {
-        res.status(500).json({
-            success: false,
-            message: err.message
-        });
-    }
-};
-
-// Update Vehicle
-const updateVehicle = async (req,res) => {
-    try{
-        const vehicle = await Vehicle.findByIdAndUpdate(
-            req.params.id,
-            req.body,
-            {
-                new:true,
-                runValidators: true
-            }
-        );
-
-        if(!vehicle) {
-            return res.status(404).json({
-                success: false,
-                message: "Vehicle not found"
-            }); 
-        }
-
-        res.status(200).json({
-            success: true,
-            message: "Vehicle Updated Successfully",
-            data: vehicle
-        });
-
-    } catch(err) { 
-        res.status(500).json({
-            success: false,
-            message: err.message
-        });
-    }
-};
-
-const deleteVehicle = async (req,res) => {
-    try{
-        const vehicle = await Vehicle.findByIdAndDelete(req.params.id);
-
-        if(!vehicle) {
-           return res.status(404).json({
-                success: false,
-                message: "Vehicle not found"
-            }); 
-        }
-
-        res.status(200).json({
-            success: true,
-            message: "Vehicle Deleted Successfully",
-            data: vehicle
-        });
-
-    } catch(err) {
-        res.status(500).json({
-            success: false,
-            message: err.message
-        });
+      return res.status(404).json({
+        success: false,
+        message: "Vehicle not found",
+      });
     }
 
-    // Also update Redis key if Redis is open
+    // Update Redis telemetry if Redis is connected
     try {
       if (redisClient.isOpen) {
         await redisClient.set(
           `vehicle:${vehicle.vehicleNo}`,
           JSON.stringify({
-            vehicleId: vehicle.vehicleNo,
-            driver: vehicle.driver,
-            latitude: vehicle.latitude,
-            longitude: vehicle.longitude,
-            speed: vehicle.speed,
-            fuel: vehicle.fuel,
-            engine: vehicle.engine,
-            temperature: vehicle.temperature,
-            status: vehicle.status,
-            timestamp: new Date().toLocaleTimeString(),
+            vehicleId:
+              vehicle.vehicleNo,
+
+            driver:
+              vehicle.driver,
+
+            latitude:
+              vehicle.latitude,
+
+            longitude:
+              vehicle.longitude,
+
+            speed:
+              vehicle.speed,
+
+            fuel:
+              vehicle.fuel,
+
+            engine:
+              vehicle.engine,
+
+            temperature:
+              vehicle.temperature,
+
+            status:
+              vehicle.status,
+
+            timestamp:
+              new Date().toLocaleTimeString(),
           })
         );
       }
     } catch (redisErr) {
-      console.warn("Redis update warning:", redisErr.message);
+      console.warn(
+        "Redis update warning:",
+        redisErr.message
+      );
     }
 
     res.status(200).json({
@@ -261,45 +326,82 @@ const deleteVehicle = async (req,res) => {
       message: "Vehicle updated successfully",
       vehicle,
     });
+
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error(
+      "updateVehicle error:",
+      error
+    );
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
-// Delete vehicle
+
+// ======================================================
+// DELETE VEHICLE
+// ======================================================
+
 const deleteVehicle = async (req, res) => {
   try {
-    const vehicle = await Vehicle.findByIdAndDelete(req.params.id);
+    const vehicle =
+      await Vehicle.findByIdAndDelete(
+        req.params.id
+      );
+
     if (!vehicle) {
-      return res.status(404).json({ success: false, message: "Vehicle not found" });
+      return res.status(404).json({
+        success: false,
+        message: "Vehicle not found",
+      });
     }
 
+    // Remove vehicle telemetry from Redis
     try {
       if (redisClient.isOpen) {
-        await redisClient.del(`vehicle:${vehicle.vehicleNo}`);
+        await redisClient.del(
+          `vehicle:${vehicle.vehicleNo}`
+        );
       }
     } catch (redisErr) {
-      console.warn("Redis del warning:", redisErr.message);
+      console.warn(
+        "Redis delete warning:",
+        redisErr.message
+      );
     }
 
     res.status(200).json({
       success: true,
       message: "Vehicle deleted successfully",
+      vehicle,
     });
+
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error(
+      "deleteVehicle error:",
+      error
+    );
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
+
+
+// ======================================================
+// EXPORT CONTROLLERS
+// ======================================================
 
 module.exports = {
   getAllVehicles,
   getVehicleById,
   createVehicle,
+  addVehicle,
   updateVehicle,
   deleteVehicle,
-    addVehicle,
-    getAllVehicles,
-    getVehicleById,
-    updateVehicle,
-    deleteVehicle
 };

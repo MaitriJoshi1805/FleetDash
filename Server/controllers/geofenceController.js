@@ -1,159 +1,136 @@
 const Geofence = require("../models/Geofence");
 
+// Get all geofences
 const getAllGeofences = async (req, res) => {
   try {
     const geofences = await Geofence.find().sort({ createdAt: -1 });
-    res.status(200).json({ success: true, count: geofences.length, geofences });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
-
-const createGeofence = async (req, res) => {
-  try {
-    const geofence = await Geofence.create(req.body);
-    res.status(201).json({ success: true, message: "Geofence created", geofence });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
-
-const deleteGeofence = async (req, res) => {
-  try {
-    const geofence = await Geofence.findByIdAndDelete(req.params.id);
-    if (!geofence) return res.status(404).json({ success: false, message: "Geofence not found" });
-    res.status(200).json({ success: true, message: "Geofence deleted" });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-//Add Geofence
-const addGeofence = async (req,res) => {
-  try {
-    const geofence = await Geofence.create(req.body);
-
-    res.status(201).json({
-      success: true,
-      message: "Geofence Added Successfully",
-      data: geofence
-    });
-  } catch(err) {
-    res.status(500).json({
-      success: false,
-      message: err.message
-    });
-  }
-};
-
-// Get All geofences
-const getAllGeofences = async (req,res) => {
-  try {
-    const geofences = await Geofence.find();
 
     res.status(200).json({
       success: true,
       count: geofences.length,
-      data: geofences
+      geofences,
     });
+  } catch (error) {
+    console.error("getAllGeofences error:", error);
 
-  } catch(err) {
     res.status(500).json({
       success: false,
-      message: err.message
+      message: error.message,
     });
   }
 };
 
-// Get Geofence by id
-const getGeofenceById = async (req,res) => {
+// Get geofence by ID
+const getGeofenceById = async (req, res) => {
   try {
     const geofence = await Geofence.findById(req.params.id);
 
-    if(!geofence) {
+    if (!geofence) {
       return res.status(404).json({
         success: false,
-        message: "Geofence not found"
+        message: "Geofence not found",
       });
     }
 
     res.status(200).json({
       success: true,
-      data: geofence
+      geofence,
     });
+  } catch (error) {
+    console.error("getGeofenceById error:", error);
 
-  } catch(err) {
     res.status(500).json({
       success: false,
-      message: err.message
+      message: error.message,
     });
   }
 };
 
-// Update Geofence
-const updateGeofence = async (req,res) => {
+// Create / Add geofence
+const createGeofence = async (req, res) => {
+  try {
+    const geofence = await Geofence.create(req.body);
+
+    res.status(201).json({
+      success: true,
+      message: "Geofence created successfully",
+      geofence,
+    });
+  } catch (error) {
+    console.error("createGeofence error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// Update geofence
+const updateGeofence = async (req, res) => {
   try {
     const geofence = await Geofence.findByIdAndUpdate(
       req.params.id,
       req.body,
       {
         new: true,
-        runValidators: true
+        runValidators: true,
       }
     );
 
-    if(!geofence) {
+    if (!geofence) {
       return res.status(404).json({
         success: false,
-        message: "Geofence not found"
+        message: "Geofence not found",
       });
     }
 
     res.status(200).json({
       success: true,
-      message: "Geofence Updated Successfully",
-      data: geofence
+      message: "Geofence updated successfully",
+      geofence,
     });
+  } catch (error) {
+    console.error("updateGeofence error:", error);
 
-  } catch(err) {
     res.status(500).json({
       success: false,
-      message: err.message
+      message: error.message,
     });
   }
 };
 
-// Delete Geofence
-const deleteGeofence = async (req,res) => {
+// Delete geofence
+const deleteGeofence = async (req, res) => {
   try {
     const geofence = await Geofence.findByIdAndDelete(req.params.id);
 
-    if(!geofence) {
+    if (!geofence) {
       return res.status(404).json({
         success: false,
-        message: "Geofence not found"
+        message: "Geofence not found",
       });
     }
 
     res.status(200).json({
       success: true,
-      message: "Geofence Deleted Successfully",
-      data: geofence
+      message: "Geofence deleted successfully",
+      geofence,
     });
+  } catch (error) {
+    console.error("deleteGeofence error:", error);
 
-  } catch(err) { 
     res.status(500).json({
       success: false,
-      message: err.message
+      message: error.message,
     });
   }
 };
 
 module.exports = {
   getAllGeofences,
-  createGeofence,
-  deleteGeofence,
-};
-  addGeofence,
-  getAllGeofences,
   getGeofenceById,
+  createGeofence,
   updateGeofence,
-  deleteGeofence
+  deleteGeofence,
 };
