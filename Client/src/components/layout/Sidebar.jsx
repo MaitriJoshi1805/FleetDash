@@ -7,12 +7,14 @@ import {
 } from "react-icons/md";
 
 import { FaTruckMoving, FaRoute, FaUserTie } from "react-icons/fa";
-import { NavLink } from "react-router-dom";
+import { NavLink,useNavigate } from "react-router-dom";
+import { useTheme } from "../../context/ThemeContext";
+
 
 const menuItems = [
   {
     name: "Dashboard",
-    path: "/",
+    path: "/dashboard",
     icon: <MdDashboard size={22} />,
   },
   {
@@ -43,8 +45,25 @@ const menuItems = [
 ];
 
 function Sidebar() {
+
+    const navigate = useNavigate();
+    const { theme } = useTheme();
+
+    const handleLogout = () => {
+      localStorage.removeItem("isLoggedIn");
+      alert("Logged Out");
+      navigate("/", { replace: true });
+    };
+
   return (
-    <aside className="w-72 bg-slate-900 border-r border-slate-800 text-white flex flex-col">
+
+    
+    <aside
+      className={`w-72 flex flex-col border-r ${
+        theme === "dark"
+          ? "bg-slate-900 border-slate-800 text-white"
+          : "bg-white border-gray-300 text-gray-900"
+      }`}>
 
       {/* Logo */}
       <div className="h-20 flex items-center justify-center border-b border-slate-800">
@@ -70,7 +89,6 @@ function Sidebar() {
         <NavLink
           key={item.name}
           to={item.path}
-          end={item.path === "/"}
           className={({ isActive }) =>
             `w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 ${
               isActive
@@ -99,7 +117,10 @@ function Sidebar() {
             Fleet Manager
           </p>
 
-          <button className="mt-4 w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 py-2 rounded-lg transition">
+          <button
+            onClick={handleLogout}
+            className="mt-4 w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 py-2 rounded-lg transition"
+          >
             <MdLogout size={20} />
             Logout
           </button>
