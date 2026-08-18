@@ -8,145 +8,294 @@ import {
   FaGlobe,
   FaDatabase,
   FaSave,
-  FaCheckCircle,
 } from "react-icons/fa";
 
 import { useSettings } from "../context/SettingsContext";
+import { useTheme } from "../context/ThemeContext";
 
 function Settings() {
-  const {
-    settings,
-    updateSettings,
-  } = useSettings();
+  const { settings, updateSettings, updateNestedSettings, t } =
+    useSettings();
+
+  const { theme, toggleTheme } = useTheme();
 
   const [message, setMessage] = useState("");
 
-  // Temporary local form values
-  const [systemPreferences, setSystemPreferences] = useState({
-    language: settings.language,
-    timezone: settings.timezone,
-    theme: settings.theme,
+  const [passwords, setPasswords] = useState({
+    current: "",
+    newPassword: "",
+    confirm: "",
   });
 
-  const [dashboardPreferences, setDashboardPreferences] =
-    useState({
-      showLiveMap: settings.showLiveMap,
-      showFleetChart: settings.showFleetChart,
-      showVehicleTable: settings.showVehicleTable,
-      showRecentAlerts: settings.showRecentAlerts,
-    });
-
-  const showSuccess = (text) => {
+  const showMessage = (text) => {
     setMessage(text);
 
     setTimeout(() => {
       setMessage("");
-    }, 2500);
+    }, 3000);
   };
 
-  // ================= SYSTEM =================
+  // ================= PROFILE =================
 
-  const handleSystemChange = (e) => {
-    const { name, value } = e.target;
+  const [profile, setProfile] = useState(settings.profile);
 
-    setSystemPreferences((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  const saveProfile = () => {
+    updateSettings({
+      profile,
+    });
+
+    showMessage(t("profileSaved"));
   };
 
-  const saveSystemPreferences = () => {
-    updateSettings(systemPreferences);
+  // ================= PASSWORD =================
 
-    showSuccess("System preferences saved successfully!");
+  const updatePassword = () => {
+    if (!passwords.current || !passwords.newPassword) {
+      alert("Please fill all password fields.");
+      return;
+    }
+
+    if (passwords.newPassword !== passwords.confirm) {
+      alert("New password and confirm password do not match.");
+      return;
+    }
+
+    setPasswords({
+      current: "",
+      newPassword: "",
+      confirm: "",
+    });
+
+    showMessage(t("passwordUpdated"));
+  };
+
+  // ================= FLEET =================
+
+  const [fleet, setFleet] = useState(settings.fleet);
+
+  const saveFleet = () => {
+    updateNestedSettings("fleet", fleet);
+    showMessage(t("fleetSaved"));
+  };
+
+  // ================= NOTIFICATIONS =================
+
+  const [notifications, setNotifications] = useState(
+    settings.notifications
+  );
+
+  const saveNotifications = () => {
+    updateNestedSettings("notifications", notifications);
+    showMessage(t("notificationsSaved"));
   };
 
   // ================= DASHBOARD =================
 
-  const handleDashboardChange = (name) => {
-    setDashboardPreferences((prev) => ({
-      ...prev,
-      [name]: !prev[name],
-    }));
+  const [dashboard, setDashboard] = useState(
+    settings.dashboard
+  );
+
+  const saveDashboard = () => {
+    updateNestedSettings("dashboard", dashboard);
+    showMessage(t("dashboardSaved"));
   };
 
-  const saveDashboardPreferences = () => {
-    updateSettings(dashboardPreferences);
+  // ================= SYSTEM =================
 
-    showSuccess(
-      "Dashboard preferences saved successfully!"
+  const [systemPreferences, setSystemPreferences] = useState({
+    language: settings.language,
+    timezone: settings.timezone,
+    systemTheme: settings.systemTheme,
+  });
+
+  const saveSystemPreferences = () => {
+    updateSettings({
+      language: systemPreferences.language,
+      timezone: systemPreferences.timezone,
+      systemTheme: systemPreferences.systemTheme,
+    });
+
+    // Change actual application theme
+    if (
+      systemPreferences.systemTheme === "Dark" &&
+      theme !== "dark"
+    ) {
+      toggleTheme();
+    }
+
+    if (
+      systemPreferences.systemTheme === "Light" &&
+      theme !== "light"
+    ) {
+      toggleTheme();
+    }
+
+    showMessage(
+      systemPreferences.language === "English"
+        ? "System preferences saved successfully!"
+        : systemPreferences.language === "Hindi"
+        ? "सिस्टम प्राथमिकताएँ सफलतापूर्वक सेव हुईं!"
+        : "સિસ્ટમ પસંદગીઓ સફળતાપૂર્વક સેવ થઈ!"
     );
   };
 
+  // ================= EXPORT =================
+
+  const exportData = (type) => {
+    const data = {
+      type,
+      exportedAt: new Date().toISOString(),
+      settings,
+    };
+
+    const blob = new Blob(
+      [JSON.stringify(data, null, 2)],
+      {
+        type: "application/json",
+      }
+    );
+
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = `${type}-export.json`;
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
+
+    showMessage(t("exported"));
+  };
+
+  const backupDatabase = () => {
+    const backup = {
+      createdAt: new Date().toISOString(),
+      application: "FleetDash",
+      settings,
+    };
+
+    const blob = new Blob(
+      [JSON.stringify(backup, null, 2)],
+      {
+        type: "application/json",
+      }
+    );
+
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = "fleetdash-backup.json";
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
+
+    showMessage(t("backupStarted"));
+  };
+
   return (
-    <div className="space-y-6 pb-10">
-
-      {/* ================= HEADER ================= */}
-
-      <div>
-        <h1 className="text-3xl font-bold text-white">
-          Settings
-        </h1>
-
-        <p className="text-slate-400">
-          Manage your FleetDash system configuration
-        </p>
-      </div>
-
-      {/* ================= SUCCESS MESSAGE ================= */}
+    <div
+      className={`space-y-6 ${
+        theme === "dark"
+          ? "text-white"
+          : "text-gray-900"
+      }`}
+    >
+      {/* ================= MESSAGE ================= */}
 
       {message && (
-        <div className="fixed top-24 right-6 z-[9999]">
-          <div className="flex items-center gap-3 bg-green-600 text-white px-5 py-3 rounded-xl shadow-xl">
-            <FaCheckCircle />
-            <span>{message}</span>
-          </div>
+        <div className="fixed top-24 right-6 z-[99999] bg-green-600 text-white px-5 py-3 rounded-xl shadow-lg">
+          {message}
         </div>
       )}
+
+      {/* ================= HEADING ================= */}
+
+      <div>
+        <h1 className="text-3xl font-bold">
+          {t("settings")}
+        </h1>
+
+        <p
+          className={
+            theme === "dark"
+              ? "text-slate-400"
+              : "text-gray-600"
+          }
+        >
+          {t("settingsDescription")}
+        </p>
+      </div>
 
       <div className="grid lg:grid-cols-2 gap-6">
 
         {/* ================= PROFILE ================= */}
 
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-
+        <div className="settings-card">
           <div className="flex items-center gap-3 mb-5">
             <FaUser className="text-blue-500 text-2xl" />
 
-            <h2 className="text-xl font-semibold text-white">
-              Profile
+            <h2 className="text-xl font-semibold">
+              {t("profile")}
             </h2>
           </div>
 
           <div className="space-y-4">
 
             <input
-              className="w-full bg-slate-800 text-white p-3 rounded-lg outline-none"
-              placeholder="Admin Name"
-              defaultValue="Admin"
+              value={profile.name}
+              onChange={(e) =>
+                setProfile({
+                  ...profile,
+                  name: e.target.value,
+                })
+              }
+              className="settings-input"
+              placeholder={t("adminName")}
             />
 
             <input
-              className="w-full bg-slate-800 text-white p-3 rounded-lg outline-none"
-              placeholder="Email"
-              defaultValue="admin@fleetdash.com"
+              value={profile.email}
+              onChange={(e) =>
+                setProfile({
+                  ...profile,
+                  email: e.target.value,
+                })
+              }
+              className="settings-input"
+              placeholder={t("email")}
             />
 
             <input
-              className="w-full bg-slate-800 text-white p-3 rounded-lg outline-none"
-              placeholder="Phone"
-              defaultValue="+91 9876543210"
+              value={profile.phone}
+              onChange={(e) =>
+                setProfile({
+                  ...profile,
+                  phone: e.target.value,
+                })
+              }
+              className="settings-input"
+              placeholder={t("phone")}
             />
 
             <button
-              type="button"
-              onClick={() =>
-                showSuccess("Profile saved successfully!")
-              }
-              className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-lg flex items-center gap-2"
+              onClick={saveProfile}
+              className="save-button bg-blue-600 hover:bg-blue-700"
             >
               <FaSave />
-              Save Profile
+              {t("saveProfile")}
             </button>
 
           </div>
@@ -154,13 +303,13 @@ function Settings() {
 
         {/* ================= SECURITY ================= */}
 
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+        <div className="settings-card">
 
           <div className="flex items-center gap-3 mb-5">
             <FaLock className="text-red-500 text-2xl" />
 
-            <h2 className="text-xl font-semibold text-white">
-              Security
+            <h2 className="text-xl font-semibold">
+              {t("security")}
             </h2>
           </div>
 
@@ -168,93 +317,131 @@ function Settings() {
 
             <input
               type="password"
-              placeholder="Current Password"
-              className="w-full bg-slate-800 text-white p-3 rounded-lg outline-none"
+              value={passwords.current}
+              onChange={(e) =>
+                setPasswords({
+                  ...passwords,
+                  current: e.target.value,
+                })
+              }
+              placeholder={t("currentPassword")}
+              className="settings-input"
             />
 
             <input
               type="password"
-              placeholder="New Password"
-              className="w-full bg-slate-800 text-white p-3 rounded-lg outline-none"
+              value={passwords.newPassword}
+              onChange={(e) =>
+                setPasswords({
+                  ...passwords,
+                  newPassword: e.target.value,
+                })
+              }
+              placeholder={t("newPassword")}
+              className="settings-input"
             />
 
             <input
               type="password"
-              placeholder="Confirm Password"
-              className="w-full bg-slate-800 text-white p-3 rounded-lg outline-none"
+              value={passwords.confirm}
+              onChange={(e) =>
+                setPasswords({
+                  ...passwords,
+                  confirm: e.target.value,
+                })
+              }
+              placeholder={t("confirmPassword")}
+              className="settings-input"
             />
 
-            <label className="flex items-center justify-between bg-slate-800 text-white p-3 rounded-lg">
-              <span>
-                Enable Two-Factor Authentication
-              </span>
+            <label className="settings-row">
+              <span>{t("twoFactor")}</span>
 
-              <input type="checkbox" />
+              <input
+                type="checkbox"
+                defaultChecked
+              />
             </label>
 
             <button
-              type="button"
-              onClick={() =>
-                showSuccess("Password updated successfully!")
-              }
-              className="bg-red-600 hover:bg-red-700 text-white px-5 py-3 rounded-lg flex items-center gap-2"
+              onClick={updatePassword}
+              className="save-button bg-red-600 hover:bg-red-700"
             >
               <FaSave />
-              Update Password
+              {t("updatePassword")}
             </button>
 
           </div>
         </div>
 
-        {/* ================= FLEET SETTINGS ================= */}
+        {/* ================= FLEET ================= */}
 
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+        <div className="settings-card">
 
           <div className="flex items-center gap-3 mb-5">
             <FaTruck className="text-green-500 text-2xl" />
 
-            <h2 className="text-xl font-semibold text-white">
-              Fleet Settings
+            <h2 className="text-xl font-semibold">
+              {t("fleetSettings")}
             </h2>
           </div>
 
           <div className="space-y-4">
 
             <input
-              className="w-full bg-slate-800 text-white p-3 rounded-lg"
-              defaultValue="80 km/h"
-              placeholder="Default Speed Limit"
+              value={fleet.speedLimit}
+              onChange={(e) =>
+                setFleet({
+                  ...fleet,
+                  speedLimit: e.target.value,
+                })
+              }
+              className="settings-input"
+              placeholder={t("defaultSpeed")}
             />
 
             <input
-              className="w-full bg-slate-800 text-white p-3 rounded-lg"
-              defaultValue="20%"
-              placeholder="Fuel Warning Level"
+              value={fleet.fuelWarning}
+              onChange={(e) =>
+                setFleet({
+                  ...fleet,
+                  fuelWarning: e.target.value,
+                })
+              }
+              className="settings-input"
+              placeholder={t("fuelWarning")}
             />
 
             <input
-              className="w-full bg-slate-800 text-white p-3 rounded-lg"
-              defaultValue="5000 KM"
-              placeholder="Maintenance Interval"
+              value={fleet.maintenanceInterval}
+              onChange={(e) =>
+                setFleet({
+                  ...fleet,
+                  maintenanceInterval: e.target.value,
+                })
+              }
+              className="settings-input"
+              placeholder={t("maintenance")}
             />
 
             <input
-              className="w-full bg-slate-800 text-white p-3 rounded-lg"
-              defaultValue="5 sec"
-              placeholder="GPS Refresh Rate"
+              value={fleet.gpsRefreshRate}
+              onChange={(e) =>
+                setFleet({
+                  ...fleet,
+                  gpsRefreshRate: e.target.value,
+                })
+              }
+              className="settings-input"
+              placeholder={t("gpsRefresh")}
             />
 
             <button
-              type="button"
-              onClick={() =>
-                showSuccess(
-                  "Fleet settings saved successfully!"
-                )
-              }
-              className="bg-green-600 hover:bg-green-700 text-white px-5 py-3 rounded-lg flex items-center gap-2"
+              onClick={saveFleet}
+              className="save-button bg-green-600 hover:bg-green-700"
             >
               <FaSave />
-              Save Fleet Settings
+              {t("saveFleet")}
             </button>
 
           </div>
@@ -262,185 +449,201 @@ function Settings() {
 
         {/* ================= NOTIFICATIONS ================= */}
 
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+        <div className="settings-card">
 
           <div className="flex items-center gap-3 mb-5">
             <FaBell className="text-yellow-400 text-2xl" />
 
-            <h2 className="text-xl font-semibold text-white">
-              Notifications
+            <h2 className="text-xl font-semibold">
+              {t("notificationSettings")}
             </h2>
           </div>
 
           <div className="space-y-4">
 
-            {[
-              ["Email Alerts", true],
-              ["SMS Alerts", false],
-              ["Push Notifications", true],
-              ["Overspeed Alerts", true],
-              ["Low Fuel Alerts", true],
-            ].map(([label, checked]) => (
-              <label
-                key={label}
-                className="flex justify-between bg-slate-800 text-white p-3 rounded-lg"
-              >
-                <span>{label}</span>
+            <label className="settings-row">
+              <span>{t("emailAlerts")}</span>
 
-                <input
-                  type="checkbox"
-                  defaultChecked={checked}
-                />
-              </label>
-            ))}
+              <input
+                type="checkbox"
+                checked={notifications.emailAlerts}
+                onChange={(e) =>
+                  setNotifications({
+                    ...notifications,
+                    emailAlerts: e.target.checked,
+                  })
+                }
+              />
+            </label>
+
+            <label className="settings-row">
+              <span>{t("smsAlerts")}</span>
+
+              <input
+                type="checkbox"
+                checked={notifications.smsAlerts}
+                onChange={(e) =>
+                  setNotifications({
+                    ...notifications,
+                    smsAlerts: e.target.checked,
+                  })
+                }
+              />
+            </label>
+
+            <label className="settings-row">
+              <span>{t("pushNotifications")}</span>
+
+              <input
+                type="checkbox"
+                checked={notifications.pushNotifications}
+                onChange={(e) =>
+                  setNotifications({
+                    ...notifications,
+                    pushNotifications: e.target.checked,
+                  })
+                }
+              />
+            </label>
+
+            <label className="settings-row">
+              <span>{t("overspeedAlerts")}</span>
+
+              <input
+                type="checkbox"
+                checked={notifications.overspeedAlerts}
+                onChange={(e) =>
+                  setNotifications({
+                    ...notifications,
+                    overspeedAlerts: e.target.checked,
+                  })
+                }
+              />
+            </label>
+
+            <label className="settings-row">
+              <span>{t("lowFuelAlerts")}</span>
+
+              <input
+                type="checkbox"
+                checked={notifications.lowFuelAlerts}
+                onChange={(e) =>
+                  setNotifications({
+                    ...notifications,
+                    lowFuelAlerts: e.target.checked,
+                  })
+                }
+              />
+            </label>
 
             <button
-              type="button"
-              onClick={() =>
-                showSuccess(
-                  "Notification settings saved successfully!"
-                )
-              }
-              className="bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-3 rounded-lg flex items-center gap-2"
+              onClick={saveNotifications}
+              className="save-button bg-yellow-500 hover:bg-yellow-600"
             >
               <FaSave />
-              Save Notifications
+              {t("saveNotifications")}
             </button>
 
           </div>
         </div>
 
-        {/* ================================================= */}
-        {/* DASHBOARD PREFERENCES */}
-        {/* ================================================= */}
+        {/* ================= DASHBOARD ================= */}
 
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+        <div className="settings-card">
 
           <div className="flex items-center gap-3 mb-5">
 
             <FaChartBar className="text-cyan-400 text-2xl" />
 
-            <h2 className="text-xl font-semibold text-white">
-              Dashboard Preferences
+            <h2 className="text-xl font-semibold">
+              {t("dashboardPreferences")}
             </h2>
 
           </div>
 
           <div className="space-y-4">
 
-            {/* LIVE MAP */}
-
-            <label className="flex items-center justify-between bg-slate-800 text-white p-4 rounded-lg cursor-pointer">
-
-              <span>
-                Show Live Map
-              </span>
+            <label className="settings-row">
+              <span>{t("showLiveMap")}</span>
 
               <input
                 type="checkbox"
-                checked={dashboardPreferences.showLiveMap}
-                onChange={() =>
-                  handleDashboardChange("showLiveMap")
+                checked={dashboard.showLiveMap}
+                onChange={(e) =>
+                  setDashboard({
+                    ...dashboard,
+                    showLiveMap: e.target.checked,
+                  })
                 }
-                className="w-5 h-5"
               />
-
             </label>
 
-            {/* FLEET CHART */}
-
-            <label className="flex items-center justify-between bg-slate-800 text-white p-4 rounded-lg cursor-pointer">
-
-              <span>
-                Show Fleet Chart
-              </span>
+            <label className="settings-row">
+              <span>{t("showFleetChart")}</span>
 
               <input
                 type="checkbox"
-                checked={dashboardPreferences.showFleetChart}
-                onChange={() =>
-                  handleDashboardChange("showFleetChart")
+                checked={dashboard.showFleetChart}
+                onChange={(e) =>
+                  setDashboard({
+                    ...dashboard,
+                    showFleetChart: e.target.checked,
+                  })
                 }
-                className="w-5 h-5"
               />
-
             </label>
 
-            {/* VEHICLE TABLE */}
-
-            <label className="flex items-center justify-between bg-slate-800 text-white p-4 rounded-lg cursor-pointer">
-
-              <span>
-                Show Vehicle Table
-              </span>
+            <label className="settings-row">
+              <span>{t("showVehicleTable")}</span>
 
               <input
                 type="checkbox"
-                checked={
-                  dashboardPreferences.showVehicleTable
+                checked={dashboard.showVehicleTable}
+                onChange={(e) =>
+                  setDashboard({
+                    ...dashboard,
+                    showVehicleTable: e.target.checked,
+                  })
                 }
-                onChange={() =>
-                  handleDashboardChange(
-                    "showVehicleTable"
-                  )
-                }
-                className="w-5 h-5"
               />
-
             </label>
 
-            {/* RECENT ALERTS */}
-
-            <label className="flex items-center justify-between bg-slate-800 text-white p-4 rounded-lg cursor-pointer">
-
-              <span>
-                Show Recent Alerts
-              </span>
+            <label className="settings-row">
+              <span>{t("showRecentAlerts")}</span>
 
               <input
                 type="checkbox"
-                checked={
-                  dashboardPreferences.showRecentAlerts
+                checked={dashboard.showRecentAlerts}
+                onChange={(e) =>
+                  setDashboard({
+                    ...dashboard,
+                    showRecentAlerts: e.target.checked,
+                  })
                 }
-                onChange={() =>
-                  handleDashboardChange(
-                    "showRecentAlerts"
-                  )
-                }
-                className="w-5 h-5"
               />
-
             </label>
-
-            {/* SAVE */}
 
             <button
-              type="button"
-              onClick={saveDashboardPreferences}
-              className="bg-cyan-600 hover:bg-cyan-700 text-white px-5 py-3 rounded-lg flex items-center gap-2"
+              onClick={saveDashboard}
+              className="save-button bg-cyan-600 hover:bg-cyan-700"
             >
-
               <FaSave />
-
-              Save Dashboard
-
+              {t("saveDashboard")}
             </button>
 
           </div>
         </div>
 
-        {/* ================================================= */}
-        {/* SYSTEM PREFERENCES */}
-        {/* ================================================= */}
+        {/* ================= SYSTEM ================= */}
 
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+        <div className="settings-card">
 
           <div className="flex items-center gap-3 mb-5">
 
             <FaGlobe className="text-green-500 text-2xl" />
 
-            <h2 className="text-xl font-semibold text-white">
-              System Preferences
+            <h2 className="text-xl font-semibold">
+              {t("systemPreferences")}
             </h2>
 
           </div>
@@ -450,37 +653,50 @@ function Settings() {
             {/* LANGUAGE */}
 
             <div>
-
               <label className="block mb-2 text-slate-400">
-                Language
+                {t("language")}
               </label>
 
               <select
-                name="language"
                 value={systemPreferences.language}
-                onChange={handleSystemChange}
-                className="w-full bg-slate-800 text-white p-3 rounded-lg outline-none"
+                onChange={(e) =>
+                  setSystemPreferences({
+                    ...systemPreferences,
+                    language: e.target.value,
+                  })
+                }
+                className="settings-input"
               >
-                <option>English</option>
-                <option>Hindi</option>
-                <option>Gujarati</option>
-              </select>
+                <option value="English">
+                  {t("english")}
+                </option>
 
+                <option value="Hindi">
+                  {t("hindi")}
+                </option>
+
+                <option value="Gujarati">
+                  {t("gujarati")}
+                </option>
+              </select>
             </div>
 
             {/* TIMEZONE */}
 
             <div>
-
               <label className="block mb-2 text-slate-400">
-                Time Zone
+                {t("timezone")}
               </label>
 
               <select
-                name="timezone"
                 value={systemPreferences.timezone}
-                onChange={handleSystemChange}
-                className="w-full bg-slate-800 text-white p-3 rounded-lg outline-none"
+                onChange={(e) =>
+                  setSystemPreferences({
+                    ...systemPreferences,
+                    timezone: e.target.value,
+                  })
+                }
+                className="settings-input"
               >
                 <option value="Asia/Kolkata">
                   Asia/Kolkata
@@ -490,39 +706,41 @@ function Settings() {
                   UTC
                 </option>
               </select>
-
             </div>
 
             {/* THEME */}
 
             <div>
-
               <label className="block mb-2 text-slate-400">
-                Theme
+                {t("theme")}
               </label>
 
               <select
-                name="theme"
-                value={systemPreferences.theme}
-                onChange={handleSystemChange}
-                className="w-full bg-slate-800 text-white p-3 rounded-lg outline-none"
+                value={systemPreferences.systemTheme}
+                onChange={(e) =>
+                  setSystemPreferences({
+                    ...systemPreferences,
+                    systemTheme: e.target.value,
+                  })
+                }
+                className="settings-input"
               >
-                <option>Dark</option>
-                <option>Light</option>
-              </select>
+                <option value="Dark">
+                  {t("dark")}
+                </option>
 
+                <option value="Light">
+                  {t("light")}
+                </option>
+              </select>
             </div>
 
             <button
-              type="button"
               onClick={saveSystemPreferences}
-              className="bg-green-600 hover:bg-green-700 text-white px-5 py-3 rounded-lg flex items-center gap-2"
+              className="save-button bg-green-600 hover:bg-green-700"
             >
-
               <FaSave />
-
-              Save Preferences
-
+              {t("savePreferences")}
             </button>
 
           </div>
@@ -530,14 +748,14 @@ function Settings() {
 
         {/* ================= BACKUP ================= */}
 
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+        <div className="settings-card">
 
           <div className="flex items-center gap-3 mb-5">
 
             <FaDatabase className="text-purple-500 text-2xl" />
 
-            <h2 className="text-xl font-semibold text-white">
-              Backup & Export
+            <h2 className="text-xl font-semibold">
+              {t("backupExport")}
             </h2>
 
           </div>
@@ -545,57 +763,108 @@ function Settings() {
           <div className="grid grid-cols-2 gap-4">
 
             <button
-              type="button"
               onClick={() =>
-                showSuccess(
-                  "Vehicles exported successfully!"
-                )
+                exportData("vehicles")
               }
-              className="bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg"
+              className="bg-blue-600 hover:bg-blue-700 py-3 rounded-lg"
             >
-              Export Vehicles
+              {t("exportVehicles")}
             </button>
 
             <button
-              type="button"
               onClick={() =>
-                showSuccess(
-                  "Drivers exported successfully!"
-                )
+                exportData("drivers")
               }
-              className="bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg"
+              className="bg-green-600 hover:bg-green-700 py-3 rounded-lg"
             >
-              Export Drivers
+              {t("exportDrivers")}
             </button>
 
             <button
-              type="button"
               onClick={() =>
-                showSuccess(
-                  "Trips exported successfully!"
-                )
+                exportData("trips")
               }
-              className="bg-yellow-500 hover:bg-yellow-600 text-white py-3 rounded-lg"
+              className="bg-yellow-500 hover:bg-yellow-600 py-3 rounded-lg"
             >
-              Export Trips
+              {t("exportTrips")}
             </button>
 
             <button
-              type="button"
-              onClick={() =>
-                showSuccess(
-                  "Database backup started!"
-                )
-              }
-              className="bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg"
+              onClick={backupDatabase}
+              className="bg-purple-600 hover:bg-purple-700 py-3 rounded-lg"
             >
-              Backup Database
+              {t("backupDatabase")}
             </button>
 
           </div>
         </div>
 
       </div>
+
+      {/* ================= LOCAL STYLES ================= */}
+
+      <style>{`
+        .settings-card {
+          background: ${
+            theme === "dark"
+              ? "#0f172a"
+              : "#ffffff"
+          };
+          border: 1px solid ${
+            theme === "dark"
+              ? "#1e293b"
+              : "#d1d5db"
+          };
+          border-radius: 1rem;
+          padding: 1.5rem;
+        }
+
+        .settings-input {
+          width: 100%;
+          padding: 0.75rem;
+          border-radius: 0.5rem;
+          outline: none;
+          background: ${
+            theme === "dark"
+              ? "#1e293b"
+              : "#f3f4f6"
+          };
+          color: ${
+            theme === "dark"
+              ? "#ffffff"
+              : "#111827"
+          };
+          border: 1px solid ${
+            theme === "dark"
+              ? "#334155"
+              : "#d1d5db"
+          };
+        }
+
+        .settings-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0.75rem;
+          border-radius: 0.5rem;
+          background: ${
+            theme === "dark"
+              ? "#1e293b"
+              : "#f3f4f6"
+          };
+        }
+
+        .save-button {
+          padding: 0.75rem 1.25rem;
+          border-radius: 0.5rem;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          color: white;
+          font-weight: 600;
+          transition: 0.2s;
+        }
+      `}</style>
     </div>
   );
 }
