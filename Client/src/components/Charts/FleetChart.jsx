@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import {
   ResponsiveContainer,
   BarChart,
@@ -9,167 +8,122 @@ import {
   Tooltip,
 } from "recharts";
 
-import { getDashboardStatsApi } from "../../services/api";
-import { useTheme } from "../../context/ThemeContext";
-
-function FleetChart({ initialChartData }) {
-  const { theme } = useTheme();
-
-  const fallbackData = [
-    { day: "Mon", trips: 32 },
-    { day: "Tue", trips: 45 },
-    { day: "Wed", trips: 38 },
-    { day: "Thu", trips: 52 },
-    { day: "Fri", trips: 48 },
-    { day: "Sat", trips: 61 },
-    { day: "Sun", trips: 29 },
+function FleetChart() {
+  const fleetData = [
+    {
+      day: "Mon",
+      vehicles: 42,
+    },
+    {
+      day: "Tue",
+      vehicles: 58,
+    },
+    {
+      day: "Wed",
+      vehicles: 35,
+    },
+    {
+      day: "Thu",
+      vehicles: 67,
+    },
+    {
+      day: "Fri",
+      vehicles: 82,
+    },
+    {
+      day: "Sat",
+      vehicles: 51,
+    },
+    {
+      day: "Sun",
+      vehicles: 29,
+    },
   ];
 
-  const [chartData, setChartData] = useState(
-    initialChartData && initialChartData.length > 0
-      ? initialChartData
-      : fallbackData
-  );
-
-  useEffect(() => {
-    const fetchChartData = async () => {
-      try {
-        if (initialChartData && initialChartData.length > 0) {
-          setChartData(initialChartData);
-          return;
-        }
-
-        const res = await getDashboardStatsApi();
-
-        console.log("Dashboard API Response:", res.data);
-
-        if (
-          res.data &&
-          res.data.chartData &&
-          res.data.chartData.length > 0
-        ) {
-          const apiData = res.data.chartData;
-
-          // Convert API data to the format required by the chart
-          const formattedData = apiData.map((item) => ({
-            day: item.day,
-            trips:
-              item.trips ??
-              item.vehicles ??
-              item.activeVehicles ??
-              0,
-          }));
-
-          setChartData(formattedData);
-        } else {
-          setChartData(fallbackData);
-        }
-      } catch (error) {
-        console.error(
-          "Error fetching fleet chart data:",
-          error
-        );
-
-        setChartData(fallbackData);
-      }
-    };
-
-    fetchChartData();
-  }, [initialChartData]);
-
   return (
-    <div
-      className={`rounded-2xl p-6 border ${
-        theme === "dark"
-          ? "bg-slate-900 border-slate-800"
-          : "bg-white border-gray-300"
-      }`}
-    >
-      {/* Heading */}
-      <h2
-        className={`text-2xl font-bold mb-2 ${
-          theme === "dark"
-            ? "text-white"
-            : "text-gray-900"
-        }`}
-      >
-        Fleet Activity Dynamics
-      </h2>
+    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full">
+      
+      {/* ================= HEADER ================= */}
 
-      {/* Subtitle */}
-      <p
-        className={`mb-6 ${
-          theme === "dark"
-            ? "text-slate-400"
-            : "text-gray-500"
-        }`}
-      >
-        Weekly active vehicle deployment pattern
-      </p>
+      <div className="mb-8">
+        <h2 className="text-3xl font-bold text-white">
+          Fleet Activity Dynamics
+        </h2>
 
-      {/* Chart */}
-      <div className="w-full h-[320px]">
+        <p className="text-slate-400 text-lg mt-2">
+          Weekly active vehicle deployment pattern
+        </p>
+      </div>
+
+      {/* ================= CHART ================= */}
+
+      <div className="w-full h-[400px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
-            data={chartData}
+            data={fleetData}
             margin={{
               top: 10,
               right: 20,
-              left: 0,
+              left: 10,
               bottom: 10,
             }}
           >
             <CartesianGrid
               strokeDasharray="5 5"
-              stroke={
-                theme === "dark"
-                  ? "#334155"
-                  : "#d1d5db"
-              }
+              stroke="#334155"
+              vertical={true}
             />
 
             <XAxis
               dataKey="day"
-              stroke={
-                theme === "dark"
-                  ? "#94a3b8"
-                  : "#475569"
-              }
+              tick={{
+                fill: "#94a3b8",
+                fontSize: 16,
+              }}
+              axisLine={{
+                stroke: "#64748b",
+              }}
+              tickLine={false}
             />
 
             <YAxis
-              stroke={
-                theme === "dark"
-                  ? "#94a3b8"
-                  : "#475569"
-              }
               domain={[0, 100]}
+              ticks={[0, 25, 50, 75, 100]}
+              tick={{
+                fill: "#94a3b8",
+                fontSize: 16,
+              }}
+              axisLine={{
+                stroke: "#64748b",
+              }}
+              tickLine={false}
             />
 
             <Tooltip
-              contentStyle={{
-                backgroundColor:
-                  theme === "dark"
-                    ? "#1e293b"
-                    : "#ffffff",
-                borderRadius: "10px",
-                border:
-                  theme === "dark"
-                    ? "1px solid #334155"
-                    : "1px solid #d1d5db",
-                color:
-                  theme === "dark"
-                    ? "#ffffff"
-                    : "#000000",
+              cursor={{
+                fill: "rgba(59,130,246,0.08)",
               }}
+              contentStyle={{
+                backgroundColor: "#0f172a",
+                border: "1px solid #334155",
+                borderRadius: "10px",
+                color: "#ffffff",
+              }}
+              labelStyle={{
+                color: "#ffffff",
+                fontWeight: "600",
+              }}
+              formatter={(value) => [
+                `${value} vehicles`,
+                "Active Vehicles",
+              ]}
             />
 
             <Bar
-              dataKey="trips"
+              dataKey="vehicles"
               fill="#3b82f6"
-              radius={[10, 10, 0, 0]}
-              animationDuration={1500}
-              animationEasing="ease-in-out"
+              radius={[7, 7, 0, 0]}
+              barSize={100}
             />
           </BarChart>
         </ResponsiveContainer>
